@@ -14,13 +14,21 @@ Usage:
   saga info <game.yaml>      Print a summary of a game definition
 ";
 
+/// Names that are commands rather than game files, so `saga validate` alone
+/// prints the usage instead of looking for a game called `validate`.
+fn is_command(argument: &str) -> bool {
+    matches!(argument, "run" | "validate" | "info")
+}
+
 fn main() -> ExitCode {
     env_logger::Builder::from_env(env_logger::Env::default().default_filter_or("info")).init();
 
     let mut arguments = std::env::args().skip(1);
     let (command, path) = match (arguments.next(), arguments.next()) {
         (Some(command), Some(path)) => (command, PathBuf::from(path)),
-        (Some(path), None) if !path.starts_with('-') => ("run".to_string(), PathBuf::from(path)),
+        (Some(argument), None) if !argument.starts_with('-') && !is_command(&argument) => {
+            ("run".to_string(), PathBuf::from(argument))
+        }
         _ => {
             eprint!("{USAGE}");
             return ExitCode::FAILURE;

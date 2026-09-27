@@ -445,7 +445,7 @@ impl Engine {
 
     /// Starts an interaction: walks to the object first when it defines `walk_to`.
     pub fn interact(&mut self, target: Target, verb: Option<Verb>) {
-        let (actions, walk_to, name) = match &target {
+        let (actions, walk_to) = match &target {
             Target::Hotspot(id) => {
                 let Some(hotspot) = self.hotspot(id) else {
                     return;
@@ -458,7 +458,6 @@ impl Engine {
                         &hotspot.name,
                     ),
                     hotspot.walk_to,
-                    hotspot.name.clone(),
                 )
             }
             Target::Actor(id) => {
@@ -468,11 +467,9 @@ impl Engine {
                 (
                     self.resolve_actions(&actor.interactions, &actor.use_with, verb, &actor.name),
                     actor.walk_to,
-                    actor.name.clone(),
                 )
             }
         };
-        let _ = name;
         self.state.selected_item = None;
         match walk_to {
             Some(destination) => {
@@ -558,6 +555,9 @@ impl Engine {
                     self.script
                         .push_front_all(vec![ScriptStep::ResolveDialogueNode]);
                 }
+            }
+            ScriptStep::MarkVisited { scene } => {
+                self.state.visited_scenes.insert(scene);
             }
         }
     }
@@ -690,8 +690,14 @@ impl Engine {
             return;
         };
 
+        // The scene that is being left has certainly been visited; the new one only
+        // counts as visited once its `on_enter` script has run, so that script can
+        // still ask whether this is the first visit.
+        let previous = self.state.current_scene.clone();
+        if !previous.is_empty() && previous != scene_id {
+            self.state.visited_scenes.insert(previous);
+        }
         self.state.current_scene = scene_id.clone();
-        self.state.visited_scenes.insert(scene_id.clone());
         self.state.dialogue = None;
         self.state.selected_item = None;
         self.pending = None;
@@ -726,14 +732,18 @@ impl Engine {
         self.state.player.target = None;
         self.state.player.animation.play("idle", None);
 
-        self.script.push_front_all(
-            scene
+        if scene.on_enter.is_empty() {
+            self.state.visited_scenes.insert(scene_id);
+        } else {
+            let mut steps: Vec<ScriptStep> = scene
                 .on_enter
                 .iter()
                 .cloned()
                 .map(ScriptStep::Action)
-                .collect(),
-        );
+                .collect();
+            steps.push(ScriptStep::MarkVisited { scene: scene_id });
+            self.script.push_front_all(steps);
+        }
     }
 
     fn enter_dialogue_node(&mut self, node_id: String) {

@@ -353,6 +353,10 @@ Every condition is a map with a `check` key.
 | `all` | `conditions` |
 | `any` | `conditions` |
 
+A scene only counts as visited once its `on_enter` script has finished, so an
+`on_enter` can check `visited_scene` for its own scene to tell a first visit
+from a return visit.
+
 ### Splitting a game over several files
 
 ```yaml

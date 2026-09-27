@@ -21,6 +21,8 @@ pub(crate) enum ScriptStep {
     ResolveDialogueNode,
     /// Continues the conversation after a choice has been made.
     ResolveChoice { goto: Option<String>, end: bool },
+    /// Records a scene as visited, once its `on_enter` actions have run.
+    MarkVisited { scene: String },
 }
 
 /// What the script is currently waiting for.

@@ -305,3 +305,71 @@ fn the_game_can_end() {
     assert!(engine.is_finished());
     assert_eq!(engine.state().ending_text.as_deref(), Some("You win!"));
 }
+
+/// `on_enter` has to be able to tell a first visit from a return visit, so a
+/// scene is only recorded as visited once its entry script has run.
+#[test]
+fn on_enter_can_ask_whether_this_is_the_first_visit() {
+    const FIRST_VISIT: &str = r#"
+title: First Visit
+start_scene: hall
+player:
+  name: Nara
+scenes:
+  hall:
+    name: Hall
+    entry_points:
+      default: { x: 40, y: 300 }
+    on_enter:
+      - action: if
+        condition:
+          check: not
+          condition:
+            check: visited_scene
+            scene: hall
+        then:
+          - action: say
+            text: "A hall I have never seen."
+        else:
+          - action: say
+            text: "This hall again."
+    hotspots:
+      - id: door
+        name: door
+        area: { x: 200, y: 200, width: 40, height: 80 }
+        interactions:
+          walk:
+            - action: go_to_scene
+              scene: yard
+  yard:
+    name: Yard
+    entry_points:
+      default: { x: 40, y: 300 }
+    hotspots:
+      - id: gate
+        name: gate
+        area: { x: 200, y: 200, width: 40, height: 80 }
+        interactions:
+          walk:
+            - action: go_to_scene
+              scene: hall
+"#;
+
+    let game = parse_game(FIRST_VISIT).expect("game parses");
+    let mut engine = Engine::new(game).expect("game starts");
+    settle_until_caption(&mut engine);
+    assert_eq!(
+        caption(&engine).as_deref(),
+        Some("A hall I have never seen.")
+    );
+    settle(&mut engine);
+    assert!(engine.state().visited_scenes.contains("hall"));
+
+    engine.click(Point::new(220.0, 220.0), MouseButton::Left);
+    settle(&mut engine);
+    assert_eq!(engine.state().current_scene, "yard");
+
+    engine.click(Point::new(220.0, 220.0), MouseButton::Left);
+    settle_until_caption(&mut engine);
+    assert_eq!(caption(&engine).as_deref(), Some("This hall again."));
+}
