@@ -24,8 +24,9 @@ pub(crate) enum ScriptStep {
 }
 
 /// What the script is currently waiting for.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, Default, PartialEq)]
 pub(crate) enum ScriptStatus {
+    #[default]
     Idle,
     /// Waiting for a timer (`wait` action).
     Waiting(f32),
@@ -40,12 +41,6 @@ pub(crate) enum ScriptStatus {
 pub(crate) struct ScriptRunner {
     queue: VecDeque<ScriptStep>,
     pub(crate) status: ScriptStatus,
-}
-
-impl Default for ScriptStatus {
-    fn default() -> Self {
-        ScriptStatus::Idle
-    }
 }
 
 impl ScriptRunner {
@@ -129,9 +124,7 @@ scenes:
         let definition = parse_game(GAME).unwrap();
         let mut state = GameState::new(&definition);
         state.inventory.add("key");
-        state
-            .variables
-            .insert("doors".to_string(), Value::Int(2));
+        state.variables.insert("doors".to_string(), Value::Int(2));
 
         let has_key = Condition::HasItem {
             item: "key".to_string(),

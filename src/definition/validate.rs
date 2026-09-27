@@ -17,10 +17,7 @@ pub fn validate(game: &GameDefinition) -> Result<()> {
         errors.push("the game defines no scenes");
     }
     if !game.scenes.contains_key(&game.start_scene) {
-        errors.push(format!(
-            "start_scene `{}` does not exist",
-            game.start_scene
-        ));
+        errors.push(format!("start_scene `{}` does not exist", game.start_scene));
     } else if let Some(entry) = &game.start_entry {
         let scene = &game.scenes[&game.start_scene];
         if !scene.entry_points.contains_key(entry) {
@@ -45,7 +42,12 @@ pub fn validate(game: &GameDefinition) -> Result<()> {
                     "item `{item_id}` combines with unknown item `{other}`"
                 ));
             }
-            check_actions(game, actions, &format!("item `{item_id}` combine `{other}`"), &mut errors);
+            check_actions(
+                game,
+                actions,
+                &format!("item `{item_id}` combine `{other}`"),
+                &mut errors,
+            );
         }
     }
 
@@ -144,7 +146,12 @@ fn validate_scene(
             if !game.items.contains_key(item) {
                 errors.push(format!("{context} reacts to unknown item `{item}`"));
             }
-            check_actions(game, actions, &format!("{context} use_with `{item}`"), errors);
+            check_actions(
+                game,
+                actions,
+                &format!("{context} use_with `{item}`"),
+                errors,
+            );
         }
     }
 
@@ -173,11 +180,21 @@ fn validate_scene(
             if !game.items.contains_key(item) {
                 errors.push(format!("{context} reacts to unknown item `{item}`"));
             }
-            check_actions(game, actions, &format!("{context} use_with `{item}`"), errors);
+            check_actions(
+                game,
+                actions,
+                &format!("{context} use_with `{item}`"),
+                errors,
+            );
         }
     }
 
-    check_actions(game, &scene.on_enter, &format!("{context} on_enter"), errors);
+    check_actions(
+        game,
+        &scene.on_enter,
+        &format!("{context} on_enter"),
+        errors,
+    );
     check_actions(game, &scene.on_exit, &format!("{context} on_exit"), errors);
 }
 
@@ -327,7 +344,10 @@ scenes:
 "#;
         let error = parse_game(yaml).expect_err("validation fails");
         let message = error.to_string();
-        assert!(message.contains("start_scene `nowhere` does not exist"), "{message}");
+        assert!(
+            message.contains("start_scene `nowhere` does not exist"),
+            "{message}"
+        );
         assert!(message.contains("unknown scene `attic`"), "{message}");
     }
 

@@ -187,7 +187,11 @@ scenes:
             "scenes:\n  hall:\n    name: Hall\n",
         )
         .unwrap();
-        std::fs::write(dir.join("game.yaml"), format!("include:\n  - scenes.yaml\n{MAIN}")).unwrap();
+        std::fs::write(
+            dir.join("game.yaml"),
+            format!("include:\n  - scenes.yaml\n{MAIN}"),
+        )
+        .unwrap();
 
         let loaded = load_game(dir.join("game.yaml")).expect("game loads");
         assert_eq!(loaded.definition.scenes.len(), 2);

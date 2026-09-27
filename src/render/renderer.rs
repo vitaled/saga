@@ -537,7 +537,11 @@ impl Renderer {
                 mapped_at_creation: false,
             });
         }
-        let raw: Vec<Instance> = self.instances.iter().map(|(_, instance)| *instance).collect();
+        let raw: Vec<Instance> = self
+            .instances
+            .iter()
+            .map(|(_, instance)| *instance)
+            .collect();
         if !raw.is_empty() {
             self.queue
                 .write_buffer(&self.instance_buffer, 0, bytemuck::cast_slice(&raw));

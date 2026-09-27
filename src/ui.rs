@@ -179,10 +179,7 @@ impl GameUi {
     fn draw_panel(&mut self, engine: &Engine, renderer: &mut Renderer) {
         let (width, height) = self.virtual_size();
         let panel_top = height - PANEL_HEIGHT;
-        renderer.draw_rect(
-            Rect::new(0.0, panel_top, width, PANEL_HEIGHT),
-            PANEL_COLOR,
-        );
+        renderer.draw_rect(Rect::new(0.0, panel_top, width, PANEL_HEIGHT), PANEL_COLOR);
 
         let choices = engine.choices();
         if !choices.is_empty() {
@@ -201,10 +198,7 @@ impl GameUi {
         for (index, verb) in Verb::PRIORITY.iter().enumerate() {
             let rect = self.verb_rect(index, panel_top);
             let active = engine.state().forced_verb == Some(*verb);
-            renderer.draw_rect(
-                rect,
-                if active { BUTTON_ACTIVE } else { BUTTON_COLOR },
-            );
+            renderer.draw_rect(rect, if active { BUTTON_ACTIVE } else { BUTTON_COLOR });
             renderer.draw_text(
                 verb.label(),
                 Point::new(rect.x + 4.0, rect.y + 3.0),
@@ -243,7 +237,12 @@ impl GameUi {
             match icon {
                 Some((texture, source)) => renderer.draw_sprite(
                     texture,
-                    Rect::new(rect.x + 3.0, rect.y + 3.0, rect.width - 6.0, rect.height - 6.0),
+                    Rect::new(
+                        rect.x + 3.0,
+                        rect.y + 3.0,
+                        rect.width - 6.0,
+                        rect.height - 6.0,
+                    ),
                     Some(source),
                     Color::WHITE,
                 ),
@@ -290,10 +289,7 @@ impl GameUi {
             let line_width = Renderer::text_width(line, TEXT_SCALE);
             renderer.draw_text(
                 line,
-                Point::new(
-                    (width - line_width) / 2.0,
-                    top + index as f32 * LINE_HEIGHT,
-                ),
+                Point::new((width - line_width) / 2.0, top + index as f32 * LINE_HEIGHT),
                 TEXT_SCALE,
                 TEXT_COLOR,
             );

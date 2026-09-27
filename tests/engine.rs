@@ -275,7 +275,10 @@ fn items_can_be_used_on_hotspots_and_combined() {
     engine.click_inventory(0);
     engine.click_inventory(1);
     settle_until_caption(&mut engine);
-    assert_eq!(caption(&engine).as_deref(), Some("Now I know where to dig."));
+    assert_eq!(
+        caption(&engine).as_deref(),
+        Some("Now I know where to dig.")
+    );
     settle(&mut engine);
     assert_eq!(
         engine.state().variable("knows_spot"),

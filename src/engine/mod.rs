@@ -384,9 +384,11 @@ impl Engine {
             }
         }
         for hotspot in scene.hotspots.iter().rev() {
-            let enabled =
-                self.state
-                    .hotspot_enabled(&self.definition, &self.state.current_scene, &hotspot.id);
+            let enabled = self.state.hotspot_enabled(
+                &self.definition,
+                &self.state.current_scene,
+                &hotspot.id,
+            );
             if enabled && hotspot.area.contains(point) {
                 return Some(Target::Hotspot(hotspot.id.clone()));
             }
@@ -449,7 +451,12 @@ impl Engine {
                     return;
                 };
                 (
-                    self.resolve_actions(&hotspot.interactions, &hotspot.use_with, verb, &hotspot.name),
+                    self.resolve_actions(
+                        &hotspot.interactions,
+                        &hotspot.use_with,
+                        verb,
+                        &hotspot.name,
+                    ),
                     hotspot.walk_to,
                     hotspot.name.clone(),
                 )
@@ -545,7 +552,8 @@ impl Engine {
                 if end {
                     self.state.dialogue = None;
                 } else if let Some(node) = goto {
-                    self.script.push_front_all(vec![ScriptStep::EnterDialogueNode { node }]);
+                    self.script
+                        .push_front_all(vec![ScriptStep::EnterDialogueNode { node }]);
                 } else {
                     self.script
                         .push_front_all(vec![ScriptStep::ResolveDialogueNode]);
@@ -612,7 +620,9 @@ impl Engine {
                 enabled,
             } => {
                 let scene = scene.unwrap_or_else(|| self.state.current_scene.clone());
-                self.state.hotspot_overrides.insert((scene, hotspot), enabled);
+                self.state
+                    .hotspot_overrides
+                    .insert((scene, hotspot), enabled);
             }
             Action::SetActorVisible { actor, visible } => {
                 let scene = self.state.current_scene.clone();
@@ -716,8 +726,14 @@ impl Engine {
         self.state.player.target = None;
         self.state.player.animation.play("idle", None);
 
-        self.script
-            .push_front_all(scene.on_enter.iter().cloned().map(ScriptStep::Action).collect());
+        self.script.push_front_all(
+            scene
+                .on_enter
+                .iter()
+                .cloned()
+                .map(ScriptStep::Action)
+                .collect(),
+        );
     }
 
     fn enter_dialogue_node(&mut self, node_id: String) {
@@ -738,8 +754,12 @@ impl Engine {
             return;
         };
 
-        let mut steps: Vec<ScriptStep> =
-            node.actions.iter().cloned().map(ScriptStep::Action).collect();
+        let mut steps: Vec<ScriptStep> = node
+            .actions
+            .iter()
+            .cloned()
+            .map(ScriptStep::Action)
+            .collect();
         if let Some(text) = node.text.clone() {
             steps.push(ScriptStep::Action(Action::Say {
                 actor: node.speaker.clone(),
