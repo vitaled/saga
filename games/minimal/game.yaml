@@ -1,0 +1,71 @@
+# The smallest possible SAGA game: one room, one hotspot, one ending.
+title: One Room
+version: "1.0"
+start_scene: cell
+
+player:
+  name: Prisoner
+
+items:
+  key:
+    name: key
+    description: Small, cold and very welcome.
+
+scenes:
+  cell:
+    name: Cell
+    walkable_area:
+      - { x: 40, y: 260 }
+      - { x: 600, y: 260 }
+      - { x: 600, y: 340 }
+      - { x: 40, y: 340 }
+    entry_points:
+      default: { x: 200, y: 320 }
+    on_enter:
+      - action: say
+        text: A cell, a door and a loose stone.
+    hotspots:
+      - id: stone
+        name: loose stone
+        area: { x: 120, y: 220, width: 60, height: 40 }
+        walk_to: { x: 150, y: 300 }
+        interactions:
+          look:
+            - action: say
+              actor: player
+              text: One stone sits higher than the rest.
+          take:
+            - action: say
+              actor: player
+              text: There is a key behind it.
+            - action: give_item
+              item: key
+            - action: set_hotspot
+              hotspot: stone
+              enabled: false
+
+      - id: door
+        name: door
+        area: { x: 420, y: 180, width: 70, height: 120 }
+        walk_to: { x: 455, y: 320 }
+        interactions:
+          look:
+            - action: say
+              actor: player
+              text: Oak, iron and one keyhole.
+          use:
+            - action: if
+              condition:
+                check: has_item
+                item: key
+              then:
+                - action: end_game
+                  text: The door swings open. THE END.
+              else:
+                - action: say
+                  actor: player
+                  text: Locked, and I have nothing to open it with.
+        use_with:
+          key:
+            - action: end_game
+              text: The door swings open. THE END.
