@@ -1,0 +1,36 @@
+[package]
+name = "saga"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.75"
+description = "SAGA's Adventure Game Architecture: a YAML-driven 2D point-and-click adventure game framework"
+repository = "https://github.com/vitaled/saga"
+license = "MIT"
+readme = "README.md"
+keywords = ["gamedev", "adventure", "point-and-click", "yaml", "wgpu"]
+categories = ["game-engines"]
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_yaml = "0.9"
+thiserror = "1"
+log = "0.4"
+env_logger = "0.11"
+wgpu = "0.19"
+winit = "0.29"
+pollster = "0.3"
+bytemuck = { version = "1", features = ["derive"] }
+image = { version = "0.25", default-features = false, features = ["png"] }
+
+[lib]
+name = "saga"
+path = "src/lib.rs"
+
+[[bin]]
+name = "saga"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1

@@ -1,0 +1,126 @@
+# The cliff path: the cave and the locked lighthouse door.
+scenes:
+  cliff:
+    name: Cliff Path
+    background: art/cliff.png
+    walkable_area:
+      - { x: 20, y: 300 }
+      - { x: 630, y: 300 }
+      - { x: 630, y: 352 }
+      - { x: 20, y: 352 }
+    entry_points:
+      from_harbour: { x: 40, y: 330 }
+      from_lighthouse: { x: 500, y: 332 }
+    on_enter:
+      - action: if
+        condition:
+          check: not
+          condition:
+            check: visited_scene
+            scene: lighthouse
+        then:
+          - action: say
+            text: Wind, gorse and a tower with a dark eye.
+    hotspots:
+      - id: cave
+        name: sea cave
+        area: { x: 36, y: 186, width: 78, height: 116 }
+        walk_to: { x: 140, y: 330 }
+        interactions:
+          look:
+            - action: say
+              actor: player
+              text: The old store cave. Pitch dark inside.
+          use:
+            - action: if
+              condition:
+                check: has_item
+                item: lantern
+              then:
+                - action: say
+                  actor: player
+                  text: The lantern shows a shelf, and an oil can on it.
+                - action: give_item
+                  item: oil_can
+                - action: set_hotspot
+                  hotspot: cave
+                  enabled: false
+              else:
+                - action: say
+                  actor: player
+                  text: I cannot see a thing in there.
+        use_with:
+          lantern:
+            - action: say
+              actor: player
+              text: The lantern shows a shelf, and an oil can on it.
+            - action: give_item
+              item: oil_can
+            - action: set_hotspot
+              hotspot: cave
+              enabled: false
+
+      - id: tower_door
+        name: lighthouse door
+        area: { x: 488, y: 232, width: 38, height: 60 }
+        walk_to: { x: 505, y: 326 }
+        interactions:
+          look:
+            - action: say
+              actor: player
+              text: Salt eaten oak, with a keyhole full of rust.
+          walk:
+            - action: if
+              condition:
+                check: variable_equals
+                name: door_unlocked
+                value: true
+              then:
+                - action: go_to_scene
+                  scene: lighthouse
+                  entry: from_cliff
+              else:
+                - action: say
+                  actor: player
+                  text: Locked, of course.
+          use:
+            - action: if
+              condition:
+                check: variable_equals
+                name: door_unlocked
+                value: true
+              then:
+                - action: go_to_scene
+                  scene: lighthouse
+                  entry: from_cliff
+              else:
+                - action: say
+                  actor: player
+                  text: Locked, of course.
+        use_with:
+          rusty_key:
+            - action: say
+              actor: player
+              text: The key turns, grinding all the way.
+            - action: set_variable
+              name: door_unlocked
+              value: true
+            - action: remove_item
+              item: rusty_key
+            - action: go_to_scene
+              scene: lighthouse
+              entry: from_cliff
+
+      - id: harbour_path
+        name: path down to the quay
+        area: { x: 20, y: 302, width: 92, height: 54 }
+        walk_to: { x: 130, y: 330 }
+        interactions:
+          walk:
+            - action: go_to_scene
+              scene: harbour
+              entry: from_cliff
+          look:
+            - action: say
+              actor: player
+              text: The path winds back down to the quay.

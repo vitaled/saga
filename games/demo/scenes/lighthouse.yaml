@@ -1,0 +1,110 @@
+# Inside the tower: the great lamp, and the end of the game.
+scenes:
+  lighthouse:
+    name: Lamp Room
+    background: art/lighthouse.png
+    walkable_area:
+      - { x: 20, y: 304 }
+      - { x: 620, y: 304 }
+      - { x: 620, y: 352 }
+      - { x: 20, y: 352 }
+    entry_points:
+      from_cliff: { x: 120, y: 330 }
+    on_enter:
+      - action: if
+        condition:
+          check: not
+          condition:
+            check: visited_scene
+            scene: lighthouse
+        then:
+          - action: say
+            text: Cold brass, cold stone, and a lamp waiting for oil.
+    hotspots:
+      - id: lamp
+        name: great lamp
+        area: { x: 246, y: 146, width: 98, height: 118 }
+        walk_to: { x: 295, y: 330 }
+        interactions:
+          look:
+            - action: say
+              actor: player
+              text: The reservoir is dry. No wonder the light died.
+          use:
+            - action: if
+              condition:
+                check: has_item
+                item: oil_can
+              then:
+                - action: say
+                  actor: player
+                  text: Oil in, wick up, match struck.
+                - action: remove_item
+                  item: oil_can
+                - action: set_variable
+                  name: lamp_lit
+                  value: true
+                - action: play_animation
+                  actor: player
+                  animation: idle
+                - action: wait
+                  seconds: 0.6
+                - action: end_game
+                  text: The beam swings out over the water, and the quay
+                    below begins to cheer. THE END.
+              else:
+                - action: say
+                  actor: player
+                  text: Dry as a bone. I need lamp oil.
+        use_with:
+          oil_can:
+            - action: say
+              actor: player
+              text: Oil in, wick up, match struck.
+            - action: remove_item
+              item: oil_can
+            - action: set_variable
+              name: lamp_lit
+              value: true
+            - action: wait
+              seconds: 0.6
+            - action: end_game
+              text: The beam swings out over the water, and the quay below
+                begins to cheer. THE END.
+          lantern:
+            - action: say
+              actor: player
+              text: A storm lantern cannot light a whole coast.
+
+      - id: stairs
+        name: stairs
+        area: { x: 396, y: 60, width: 244, height: 210 }
+        interactions:
+          look:
+            - action: say
+              actor: player
+              text: They spiral up into the dark, and I have climbed enough.
+
+      - id: window
+        name: window
+        area: { x: 106, y: 56, width: 68, height: 68 }
+        walk_to: { x: 140, y: 330 }
+        interactions:
+          look:
+            - action: say
+              actor: player
+              text: From here the whole harbour looks like a row of candles.
+
+      - id: tower_exit
+        name: tower door
+        area: { x: 26, y: 186, width: 68, height: 118 }
+        walk_to: { x: 120, y: 330 }
+        interactions:
+          walk:
+            - action: go_to_scene
+              scene: cliff
+              entry: from_lighthouse
+          look:
+            - action: say
+              actor: player
+              text: The way back out to the cliff.

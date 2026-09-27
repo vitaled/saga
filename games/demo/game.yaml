@@ -1,0 +1,160 @@
+# The Keeper's Lamp - the SAGA demo game.
+#
+# The scenes live in their own files and are merged into this document by the
+# `include` key. Every coordinate is expressed in the virtual resolution
+# declared below (640x360), whatever the size of the window.
+
+include:
+  - scenes/harbour.yaml
+  - scenes/cliff.yaml
+  - scenes/lighthouse.yaml
+
+title: The Keeper's Lamp
+version: "1.0"
+author: SAGA
+window:
+  width: 1280
+  height: 720
+  virtual_width: 640
+  virtual_height: 360
+
+start_scene: harbour
+start_entry: arrival
+
+player:
+  name: Nell
+  sprite: player
+  walk_speed: 150
+  scale: 1.1
+
+variables:
+  door_unlocked: false
+  lamp_lit: false
+
+sprites:
+  player:
+    image: art/player.png
+    frame_width: 24
+    frame_height: 48
+    animations:
+      idle:
+        frames: [0, 1]
+        fps: 2
+      walk:
+        frames: [2, 3, 4, 5]
+        fps: 9
+  keeper:
+    image: art/keeper.png
+    frame_width: 24
+    frame_height: 48
+    animations:
+      idle:
+        frames: [0, 1]
+        fps: 1.5
+      wave:
+        frames: [1, 0, 1]
+        fps: 4
+        looping: false
+      walk:
+        frames: [0, 1]
+        fps: 6
+  icons:
+    image: art/items.png
+    frame_width: 24
+    frame_height: 24
+
+items:
+  rusty_key:
+    name: rusty key
+    description: The key to the lighthouse door. It smells of seaweed.
+    icon: icons
+    icon_frame: 0
+  oil_can:
+    name: oil can
+    description: Heavy, and still half full of lamp oil.
+    icon: icons
+    icon_frame: 1
+  rope:
+    name: rope
+    description: A long rope with a hook at the end. Marla's own.
+    icon: icons
+    icon_frame: 2
+    combine:
+      lantern:
+        - action: say
+          text: A lantern on a rope. Charming, but not useful right now.
+  lantern:
+    name: lantern
+    description: A small storm lantern. It still burns.
+    icon: icons
+    icon_frame: 3
+
+dialogues:
+  marla:
+    start: greeting
+    nodes:
+      greeting:
+        speaker: Marla
+        text: The light has been dark for three nights, girl. Three nights!
+        choices:
+          - text: What happened to the keeper?
+            once: true
+            goto: keeper
+          - text: How do I get into the lighthouse?
+            goto: door
+          - text: Could I borrow that rope?
+            condition:
+              check: not
+              condition:
+                check: has_item
+                item: rope
+            goto: rope
+          - text: I will go and light the lamp myself.
+            condition:
+              check: has_item
+              item: rope
+            once: true
+            goto: farewell
+          - text: Just enjoying the view.
+            end: true
+      keeper:
+        speaker: Marla
+        text: Gone to the mainland, and the storm took the ferry with him.
+        goto: greeting
+      door:
+        speaker: Marla
+        text: Locked. The old key went into my rain barrel and I am not
+          reaching in there.
+        actions:
+          - action: set_variable
+            name: heard_about_key
+            value: true
+        goto: greeting
+      rope:
+        speaker: Marla
+        text: Take it. Mind the hook.
+        actions:
+          - action: give_item
+            item: rope
+          - action: play_animation
+            actor: marla
+            animation: wave
+            looping: false
+        goto: greeting
+      farewell:
+        speaker: Marla
+        text: Then I will watch from the quay. Good luck, girl.
+        actions:
+          - action: play_animation
+            actor: marla
+            animation: wave
+            looping: false
+          - action: wait
+            seconds: 0.4
+          - action: move_actor
+            actor: marla
+            to: { x: 620, y: 322 }
+          - action: set_actor_visible
+            actor: marla
+            visible: false
+        end: true
